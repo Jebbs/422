@@ -1,0 +1,42 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 4/4/2017 3:20:59 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7  START   ORG     $1000 ; first instruction of program
+00001000                             8  
+00001000                             9  *-------Code for output-------
+00001000  43F9 00001012             10          LEA     MESSAGE,A1
+00001006  103C 000E                 11          MOVE.B  #14,D0
+0000100A  4E4F                      12          TRAP    #15
+0000100C                            13          
+0000100C  103C 0009                 14          MOVE.B  #9,D0
+00001010  4E4F                      15          TRAP    #15
+00001012                            16  
+00001012  =0000000D                 17  CR      EQU     $0D
+00001012  =0000000A                 18  LF      EQU     $0A
+00001012= 48 65 6C 6C 6F 2E ...     19  MESSAGE DC.B    'Hello. My name is Jeremy DeHaan.',CR,LF
+00001034= 49 20 6C 69 6B 65 ...     20          DC.B    'I like video games, and board games, and I recently started DMing for D&D. So',CR,LF
+00001083= 66 61 72 2C 20 49 ...     21          DC.B    'far, I am very much enjoying this class. There is a lot that I think will be',CR,LF
+000010D1= 61 70 70 6C 69 63 ...     22          DC.B    'applicable to my independent study.',CR,LF
+000010F6= 0D 0A                     23          DC.B    CR,LF
+000010F8= 54 68 61 6E 6B 20 ...     24          DC.B    'Thank you for listening.',CR,LF,0
+00001113                            25  
+00001113                            26          END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CR                  D
+LF                  A
+MESSAGE             1012
+START               1000
