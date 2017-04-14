@@ -1,65 +1,64 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 4/6/2017 8:29:46 PM
+Created On: 4/10/2017 8:30:15 PM
 
 00000000                             1  *-----------------------------------------------------------
-00000000                             2  * Title      :
-00000000                             3  * Written by :
-00000000                             4  * Date       :
-00000000                             5  * Description:
-00000000                             6  *-----------------------------------------------------------
-00000000  =0000000D                  7  CR      EQU     $0D
-00000000  =0000000A                  8  LF      EQU     $0A
-00000000  =001988F2                  9  SID     EQU     1673458
-00000000                            10  
-Line 11 ERROR: Undefined symbol
-00000000                            11  IOCMD   EQU     TRAP    #15
+00000000                             2  * Title      : Input Branch Tutorial
+00000000                             3  * Written by : Jeremy DeHaan
+00000000                             4  * Date       : 04/10/2017
+00000000                             5  * Description: This code will ask for you to input a number.
+00000000                             6  *              It then checks if the number is between 20 and
+00000000                             7  *              25 and goes to various banches accordingly.
+00000000                             8  *
+00000000                             9  *              If the input is equal to the SID number, it
+00000000                            10  *              terminates the program.
+00000000                            11  *-----------------------------------------------------------
 00000000                            12  
-00001000                            13  START   ORG     $1000    ; first instruction of program
-00001000                            14  *-------Code for output-----------
-00001000  43F9 0000105E             15  LOOP    LEA MESSAGE,A1
-00001006  103C 000E                 16          MOVE.B  #14,D0
-0000100A  4E4F                      17          TRAP    #15
-0000100C                            18          
-0000100C                            19          
-0000100C  163C 0003                 20          MOVE.B  #3,D3
-00001010  0603 00FC                 21          ADD.B   #-4,D3
-00001014                            22  
-00001014                            23  *------Code for input---------
-00001014  103C 0004                 24          MOVE.B  #4,D0
-00001018  4E4F                      25          TRAP    #15
-0000101A  B2B9 001988F2             26          CMP.L   SID,D1
-00001020  6700 0036                 27          BEQ     DONE
-00001024                            28  
-00001024  B2BC 00000016             29          CMP.L   #22,D1
-0000102A  6D00 0010                 30          BLT     INVALID
-0000102E  B2BC 00000019             31          CMP.L   #25,D1
-00001034  6E00 0006                 32          BGT     INVALID
-00001038  6000 0010                 33          BRA     VALID
-0000103C                            34  
-0000103C  43F9 000010C1             35  INVALID LEA     INV,A1
-00001042  103C 000E                 36          MOVE.B  #14,D0
-00001046  4E4F                      37          TRAP    #15
-00001048  60B6                      38          BRA     LOOP
-0000104A                            39  
-0000104A  43F9 0000109A             40  VALID   LEA     VLD,A1
-00001050  103C 000E                 41          MOVE.B  #14,D0
-00001054  4E4F                      42          TRAP    #15
-00001056  60A8                      43          BRA     LOOP
-00001058                            44  
-00001058                            45  
-00001058  103C 0009                 46  DONE    MOVE.B  #9,D0
-0000105C  4E4F                      47          TRAP    #15     halt simulator
-0000105E                            48  
-0000105E= 45 6E 74 65 72 20 ...     49  MESSAGE DC.B    'Enter a number between 22 and 25, or enter my SID to exit: ',0
-0000109A= 48 6F 6F 72 61 79 ...     50  VLD     DC.B    'Hooray! You can follow instructions!',CR,LF,0
-000010C1= 54 68 61 74 20 69 ...     51  INV     DC.B    'That is not between 22 and 25, you asshole.',CR,LF,0
-000010EF                            52  
-000010EF                            53  * Put variables and constants here
-000010EF                            54  
-000010EF                            55          END     START        ; last line of source
+00000000                            13  *-----Text replacements-------
+00000000  =0000000D                 14  CR      EQU     $0D
+00000000  =0000000A                 15  LF      EQU     $0A
+00000000  =001988F2                 16  SID     EQU     1673458
+00000000                            17  
+00001000                            18  START   ORG     $1000   ; first instruction of program
+00001000                            19  *-------Code for output-------
+00001000  43F9 00001056             20  LOOP    LEA MESSAGE,A1  ; loads the address of MESSAGE into A1  
+00001006  103C 000E                 21          MOVE.B  #14,D0  ; moves 14 iunto D0
+0000100A  4E4F                      22          TRAP    #15     ; runs the I/O command with code #14(print text)
+0000100C                            23  
+0000100C                            24  *------Code for input---------
+0000100C  103C 0004                 25          MOVE.B  #4,D0   ; moves 4 into D0
+00001010  4E4F                      26          TRAP    #15     ; runs the I/O command with code #4(read number into D1)
+00001012  B2BC 001988F2             27          CMP.L   #SID,D1  ; compare the input with the SID number
+00001018  6700 0036                 28          BEQ     DONE    ; if they are equal, we go to DONE (and end the program)
+0000101C                            29  
+0000101C  B2BC 00000014             30          CMP.L   #20,D1  ; compare 20 with the value in D1
+00001022  6D00 0010                 31          BLT     INVALID ; if this value is less than 20, go to INVALID
+00001026  B2BC 00000019             32          CMP.L   #25,D1  ; compare 25 with the value in D1
+0000102C  6E00 0006                 33          BGT     INVALID ; if this value is greater than 25, go to IVALID
+00001030  6000 0010                 34          BRA     VALID   ; if the value in D1 is between 20 and 25, it is a valid number
+00001034                            35  
+00001034  43F9 000010B9             36  INVALID LEA     INV,A1  ; load the address of INV into A1 (invalid value message)
+0000103A  103C 000E                 37          MOVE.B  #14,D0  ; moves 14 iunto D0 
+0000103E  4E4F                      38          TRAP    #15     ; runs the I/O command with code #14(print text)
+00001040  60BE                      39          BRA     LOOP    ; go to the start of the loop
+00001042                            40  
+00001042  43F9 00001092             41  VALID   LEA     VLD,A1  ; load the address of VLD into A1 (valid value message)
+00001048  103C 000E                 42          MOVE.B  #14,D0  ; moves 14 iunto D0 
+0000104C  4E4F                      43          TRAP    #15     ; runs the I/O command with code #14(print text)
+0000104E  60B0                      44          BRA     LOOP    ; go to the start of the loop
+00001050                            45  
+00001050                            46  
+00001050  103C 0009                 47  DONE    MOVE.B  #9,D0   ; moves 9 into D0
+00001054  4E4F                      48          TRAP    #15     ; runs the I/O command with code #9(halt program)
+00001056                            49          
+00001056                            50  *-------Constants-------------
+00001056= 45 6E 74 65 72 20 ...     51  MESSAGE DC.B    'Enter a number between 20 and 25, or enter my SID to exit: ',0
+00001092= 48 6F 6F 72 61 79 ...     52  VLD     DC.B    'Hooray! You can follow instructions!',CR,LF,0
+000010B9= 54 68 61 74 20 69 ...     53  INV     DC.B    'That is not between 20 and 25. Please try again.',CR,LF,0
+000010EC                            54  
+000010EC                            55          END     START        ; last line of source
 
-1 error detected
+No errors detected
 No warnings generated
 
 
@@ -67,13 +66,13 @@ SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
 CR                  D
-DONE                1058
-INV                 10C1
-INVALID             103C
+DONE                1050
+INV                 10B9
+INVALID             1034
 LF                  A
 LOOP                1000
-MESSAGE             105E
+MESSAGE             1056
 SID                 1988F2
 START               1000
-VALID               104A
-VLD                 109A
+VALID               1042
+VLD                 1092
