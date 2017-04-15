@@ -1,0 +1,106 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 4/14/2017 10:50:03 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  Word Addition
+00000000                             3  * Written by :  Jeremy DeHaan
+00000000                             4  * Date       :  04/13/2017
+00000000                             5  * Description:  This program will ask for two numbers(assumed
+00000000                             6  *               to be 16bit), and will then add them and
+00000000                             7  *               display the result.
+00000000                             8  *
+00000000                             9  *               It also notifies the user if an overflow
+00000000                            10  *               occurred during the addition.
+00000000                            11  *-----------------------------------------------------------
+00001000                            12      ORG    $1000
+00001000                            13  START:                  ; first instruction of program
+00001000                            14  
+00001000                            15  *-------------CODE----------------          
+00001000                            16              
+00001000  43F9 00001068             17              LEA ENTRMSSG, A1    ; load the first message into A1
+00001006  103C 000E                 18              MOVE.B #14,D0
+0000100A  4E4F                      19              TRAP #15            ; display it
+0000100C                            20              
+0000100C  103C 0004                 21              MOVE.B #4,D0        ; set up for input
+00001010  4E4F                      22              TRAP #15            ; get first number from user
+00001012  3401                      23              MOVE.W D1,D2        ; move that number (as word) into D2
+00001014                            24              
+00001014  43F9 0000108C             25              LEA SCNDMSSG, A1    ;load second message into A1
+0000101A  103C 000E                 26              MOVE.B #14,D0
+0000101E  4E4F                      27              TRAP #15            ; display it
+00001020                            28              
+00001020  103C 0004                 29              MOVE.B #4,D0        ; set up for input
+00001024  4E4F                      30              TRAP #15            ; get second number from user
+00001026                            31              
+00001026  D441                      32              ADD.W D1,D2         ; add the first and second numbers together
+00001028  59C3                      33              SVS D3              ; check for overflow
+0000102A                            34              
+0000102A  31C2 6000                 35              MOVE.W D2,$6000     ; move the value of the addition into address $6000
+0000102E                            36              
+0000102E  4281                      37              CLR.L D1              ; clear D1 (is is used for printing)
+00001030  3202                      38              MOVE.W D2,D1        ; Move our addition into D1 for printing
+00001032  B47C 0000                 39              CMP #0, D2          ; compare 0 and the added number
+00001036  6D00 0024                 40              BLT NEGATIVE        ; go to the NEGATIVE label to make sure printing works
+0000103A                            41  
+0000103A                            42  
+0000103A                            43  *-------------Printing--------------
+0000103A                            44  
+0000103A                            45  
+0000103A  103C 0003                 46  PRINTNUM    MOVE.B #3,D0        ; set up for number output
+0000103E  4E4F                      47              TRAP #15            ; output added number
+00001040                            48              
+00001040  B67C 0000                 49              CMP #0,D3           ; compare the overflow bits to 0
+00001044  6600 0006                 50              BNE PRINTERR        ; if the overflow bits aren't zero, go to print an error message
+00001048  6000 001A                 51              BRA EXIT            ; otherwise we are done and can exit
+0000104C                            52              
+0000104C                            53              
+0000104C  43F9 00001095             54  PRINTERR    LEA ERRMSSG, A1     ; load error message into A1
+00001052  103C 000E                 55              MOVE.B #14,D0
+00001056  4E4F                      56              TRAP #15            ; display it
+00001058  6000 000A                 57              BRA EXIT
+0000105C                            58              
+0000105C                            59  
+0000105C                            60            
+0000105C  0681 FFFF0000             61  NEGATIVE    ADD.L #$FFFF0000, D1 ; if our added number is negative, make sure the output longword is negative
+00001062  60D6                      62              BRA   PRINTNUM         
+00001064                            63              
+00001064                            64  
+00001064                            65  
+00001064                            66  
+00001064  FFFF FFFF                 67  EXIT        SIMHALT              ; halt simulator
+00001068                            68  
+00001068                            69  *--------------Constants----------------
+00001068                            70  
+00001068                            71  
+00001068  =0000000D                 72  CR          EQU     $0D
+00001068  =0000000A                 73  LF          EQU     $0A
+00001068                            74  
+00001068= 45 6E 74 65 72 20 ...     75  ENTRMSSG    DC.B    'Enter two numbers to add.',CR,LF
+00001083= 46 69 72 73 74 3A ...     76              DC.B    'First:  ',0
+0000108C                            77  
+0000108C= 53 65 63 6F 6E 64 ...     78  SCNDMSSG    DC.B    'Second: ',0
+00001095                            79  
+00001095= 0D 0A 41 6E 20 6F ...     80  ERRMSSG     DC.B    CR,LF,'An overflow occurred. Addition may not be correct.',CR,LF,0
+000010CC                            81  
+000010CC                            82  
+000010CC                            83  
+000010CC                            84              END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CR                  D
+ENTRMSSG            1068
+ERRMSSG             1095
+EXIT                1064
+LF                  A
+NEGATIVE            105C
+PRINTERR            104C
+PRINTNUM            103A
+SCNDMSSG            108C
+START               1000
