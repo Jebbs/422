@@ -1,0 +1,171 @@
+00004000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 4/18/2017 6:17:04 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  Floating point decoder
+00000000                             3  * Written by :  Jeremy DeHaan
+00000000                             4  * Date       :  04/18/2017
+00000000                             5  * Description:  This program takes in a 32bit IEEE floating
+00000000                             6  *               point number in HEX and decodes it to the
+00000000                             7  *               various parts.
+00000000                             8  *-----------------------------------------------------------
+00004000                             9      ORG    $4000
+00004000                            10  START:                  ; first instruction of program
+00004000                            11  
+00004000                            12  * Put program code here
+00004000  43F9 00004107             13              LEA MSSG, A1        ; load the first message into A1
+00004006  103C 000E                 14              MOVE.B #14,D0
+0000400A  4E4F                      15              TRAP #15            ; display it
+0000400C                            16              
+0000400C  103C 0002                 17              MOVE.B #2,D0        ; set up for input
+00004010  4E4F                      18              TRAP #15            ; get a string from user and put address into A1
+00004012  4240                      19              CLR D0              ; clear D0 before going to the conversion subroutine
+00004014  247C 0000A000             20              MOVEA.L #$A000, A2  ; use $A000 as some random memory address (A2 is used in the subroutine)
+0000401A  4EB9 000040B6             21              JSR CNVFRMASCII     ; convert the string from ascii to number (saves to $A000)
+00004020                            22              
+00004020  2639 0000A000             23              MOVE.L $A000,D3
+00004026  E38B                      24              LSL.L #1, D3      ; rotate the binary representation
+00004028                            25              
+00004028                            26              
+00004028  55C0                      27              SCS D0
+0000402A  13C0 00004159             28              MOVE.B D0, SignBit
+00004030                            29              
+00004030  23C3 0000A000             30              MOVE.L D3, $A000
+00004036                            31              
+00004036  13F9 0000A000 00004165    32              MOVE.B $A000, Exponant
+00004040  1239 00004165             33              MOVE.B Exponant, D1
+00004046                            34              
+00004046                            35              
+00004046  2639 0000A000             36              MOVE.L $A000,D3
+0000404C  E18B                      37              LSL.L #8, D3      ; rotate the binary representation
+0000404E  E08B                      38              LSR.L #8, D3
+00004050  E28B                      39              LSR.L #1, D3
+00004052                            40              
+00004052  E28B                      41  SHIFTLOOP   LSR.L #1,D3
+00004054  6500 0004                 42              BCS SHIFTEND
+00004058  60F8                      43              BRA SHIFTLOOP
+0000405A                            44              
+0000405A  E38B                      45  SHIFTEND    LSL.L #1, D3
+0000405C  5283                      46              ADD.L #1, D3
+0000405E  23C3 00004172             47              MOVE.L D3, Mantissa
+00004064                            48              
+00004064                            49              
+00004064  43F9 00004104             50              LEA NEWLINE, A1     ; load a blank newline into A1
+0000406A  103C 000E                 51              MOVE.B #14,D0
+0000406E  4E4F                      52              TRAP #15            ; display it
+00004070                            53              
+00004070                            54              
+00004070                            55              
+00004070  4241                      56              CLR D1
+00004072  1239 00004159             57              MOVE.B SignBit, D1
+00004078  103C 0003                 58              MOVE.B #3,D0
+0000407C  4E4F                      59              TRAP #15            ; display it
+0000407E                            60              
+0000407E  43F9 00004104             61              LEA NEWLINE, A1     ; load a blank newline into A1
+00004084  103C 000E                 62              MOVE.B #14,D0
+00004088  4E4F                      63              TRAP #15            ; display it
+0000408A                            64              
+0000408A  4241                      65              CLR D1
+0000408C  1239 00004165             66              MOVE.B Exponant, D1
+00004092  103C 0003                 67              MOVE.B #3,D0
+00004096  4E4F                      68              TRAP #15            ; display it
+00004098                            69              
+00004098                            70              
+00004098  43F9 00004104             71              LEA NEWLINE, A1     ; load a blank newline into A1
+0000409E  103C 000E                 72              MOVE.B #14,D0
+000040A2  4E4F                      73              TRAP #15            ; display it
+000040A4                            74              
+000040A4                            75              
+000040A4  4241                      76              CLR D1
+000040A6  2239 00004172             77              MOVE.L Mantissa, D1
+000040AC  103C 0003                 78              MOVE.B #3,D0
+000040B0  4E4F                      79              TRAP #15            ; display it
+000040B2                            80              
+000040B2                            81              
+000040B2  FFFF FFFF                 82              SIMHALT             ; halt simulator
+000040B6                            83  
+000040B6                            84  
+000040B6                            85  
+000040B6  1611                      86  CNVFRMASCII MOVE.B (A1),D3      ; copy the first hex character to D3
+000040B8  B63C 0000                 87              CMP.B #0, D3        ; check if we found the null terminator
+000040BC  6700 0016                 88              BEQ CFAEXIT         ; If we do, return from subroutine
+000040C0  1819                      89              MOVE.B (A1)+,D4     ; copy the first hex character to D4
+000040C2  E80B                      90              LSR.B #4, D3        ; shift D3 to just get the top 4 bits
+000040C4  E90C                      91              LSL.B #4, D4        ; shift D4 twice get just the bottom 4 bits
+000040C6  E80C                      92              LSR.B #4, D4
+000040C8  B63C 0003                 93              CMP.B #3,D3         ; if D3 is equal to 3, this hex value is a number
+000040CC  6700 0008                 94              BEQ CNVNUM          ; convert to a number
+000040D0  6000 0012                 95              BRA CNVLET
+000040D4                            96              
+000040D4  4E75                      97  CFAEXIT     RTS                 ;
+000040D6                            98  
+000040D6                            99  
+000040D6  B03C 0000                100  CNVNUM      CMP.B #0, D0
+000040DA  6700 001A                101              BEQ SHIFT
+000040DE  4240                     102              CLR D0
+000040E0  D91A                     103              ADD.B D4, (A2)+    ; move the number value into
+000040E2  60D2                     104              BRA CNVFRMASCII
+000040E4                           105  
+000040E4  0604 0009                106  CNVLET      ADD.B #9, D4
+000040E8  B03C 0000                107              CMP.B #0, D0
+000040EC  6700 0008                108              BEQ SHIFT
+000040F0  4240                     109              CLR D0
+000040F2  D91A                     110              ADD.B D4, (A2)+
+000040F4  60C0                     111              BRA CNVFRMASCII
+000040F6                           112              
+000040F6  E90C                     113  SHIFT       LSL.B #4, D4
+000040F8  1484                     114              MOVE.B D4, (A2)
+000040FA  103C 0001                115              MOVE.B #1, D0
+000040FE  60B6                     116              BRA CNVFRMASCII
+00004100                           117              
+00004100                           118              
+00004100                           119              
+00004100                           120              
+00004100                           121  
+00004100                           122  
+00004100  FFFF FFFF                123              SIMHALT             ; halt simulator
+00004104                           124  
+00004104                           125  * Put variables and constants here
+00004104  =0000000D                126  CR          EQU     $0D
+00004104  =0000000A                127  LF          EQU     $0A
+00004104                           128  
+00004104= 0D 0A 00                 129  NEWLINE     DC.B    CR,LF,0
+00004107                           130  
+00004107= 50 6C 65 61 73 65 ...    131  MSSG        DC.B    'Please enter a 32bit hex representation of a floating point number: ',CR,LF,0
+0000414E= 53 69 67 6E 20 62 ...    132  SBSTR       DC.B    'Sign bit: ',0
+00004159                           133  SignBit     DS.B    1
+0000415A= 45 78 70 6F 6E 61 ...    134  EXPSTR      DC.B    'Exponant: ',0
+00004165                           135  Exponant    DS.B    1
+00004166= 4D 61 6E 74 69 73 ...    136  MNTSTR      DC.B    'Mantissa: ',0
+00004172                           137  Mantissa    DS.L    1    
+00004176                           138  
+00004176                           139  
+00004176                           140  
+00004176                           141              END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CFAEXIT             40D4
+CNVFRMASCII         40B6
+CNVLET              40E4
+CNVNUM              40D6
+CR                  D
+EXPONANT            4165
+EXPSTR              415A
+LF                  A
+MANTISSA            4172
+MNTSTR              4166
+MSSG                4107
+NEWLINE             4104
+SBSTR               414E
+SHIFT               40F6
+SHIFTEND            405A
+SHIFTLOOP           4052
+SIGNBIT             4159
+START               4000
